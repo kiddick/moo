@@ -10,6 +10,7 @@ with open(os.path.join(__location__, 'settings.yaml')) as ysttgs:
 
 
 class Config(object):
-	REPO = settings['draft_repo']
-	GTOKEN = settings['github_token']
-	BTOKEN = settings['bot_token']
+    LREPO = settings['draft_repo']
+    GREPO = settings['github_repo']
+    GTOKEN = settings['github_token']
+    BTOKEN = settings['bot_token']

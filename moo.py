@@ -81,11 +81,8 @@ def bookmark(bot, update, args):
 
     elif chat_state == AWAIT_INPUT and chat_context[0] == user_id:
         state[chat_id] = AWAIT_CONFIRMATION
-
-        # context[chat_id] = (user_id, update.message.text)
         context[chat_id][1].description = text
-        # reply_markup = ReplyKeyboardMarkup([[YES, NO]], one_time_keyboard=True)
-        # reply_markup=reply_markup
+
         bot.sendMessage(
             chat_id, text="Check bookmark\n" + str(context[chat_id][1]))
 
@@ -111,7 +108,14 @@ def cancel(bot, update):
 
 
 def info(bot, update):
-    bot.sendMessage(update.message.chat_id, text="Use /add to test this bot.")
+    bot.sendMessage(update.message.chat_id, text='Use /add to test this bot.')
+
+def src(bot, update, args):
+    if not args or args[0] not in CATEGORY:
+        bot.sendMessage(update.message.chat_id, text=config.Config.GREPO)
+    else:
+        link = '{repo}/blob/master/{cat}/{cat}.md'.format(repo=config.Config.GREPO, cat=CATEGORY[args[0]])
+        bot.sendMessage(update.message.chat_id, text=link)
 
 
 updater = Updater(config.Config.BTOKEN)
@@ -121,6 +125,7 @@ updater.dispatcher.addTelegramCommandHandler('add', bookmark)
 updater.dispatcher.addTelegramMessageHandler(bookmark)
 updater.dispatcher.addTelegramCommandHandler('cancel', cancel)
 updater.dispatcher.addTelegramCommandHandler('info', info)
+updater.dispatcher.addTelegramCommandHandler('src', src)
 
 
 updater.start_polling()
