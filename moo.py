@@ -3,6 +3,7 @@
 import logging
 
 import draft
+import qstack
 
 from telegram import Emoji, ForceReply, ReplyKeyboardMarkup, ParseMode
 from telegram.ext import Updater
@@ -110,12 +111,26 @@ def cancel(bot, update):
 def info(bot, update):
     bot.sendMessage(update.message.chat_id, text='Use /add to test this bot.')
 
+
 def src(bot, update, args):
     if not args or args[0] not in CATEGORY:
         bot.sendMessage(update.message.chat_id, text=config.Config.GREPO)
     else:
-        link = '{repo}/blob/master/{cat}/{cat}.md'.format(repo=config.Config.GREPO, cat=CATEGORY[args[0]])
+        link = '{repo}/blob/master/{cat}/{cat}.md'.format(
+            repo=config.Config.GREPO, cat=CATEGORY[args[0]])
         bot.sendMessage(update.message.chat_id, text=link)
+
+
+def pyq(bot, update):
+    link, title = qstack.nextq()
+    qstack.incrementq()
+    content = '* _[{}]({})_\n'.format(title, link)
+    draft.add_question(content)
+    # draft.push(m='Add new question.')
+    bot.sendMessage(update.message.chat_id,
+                    text='[{}]({})\n'.format(title, link),
+                    parse_mode=ParseMode.MARKDOWN,
+                    disable_web_page_preview=True)
 
 
 updater = Updater(config.Config.BTOKEN)
@@ -126,6 +141,7 @@ updater.dispatcher.addTelegramMessageHandler(bookmark)
 updater.dispatcher.addTelegramCommandHandler('cancel', cancel)
 updater.dispatcher.addTelegramCommandHandler('info', info)
 updater.dispatcher.addTelegramCommandHandler('src', src)
+updater.dispatcher.addTelegramCommandHandler('pyq', pyq)
 
 
 updater.start_polling()

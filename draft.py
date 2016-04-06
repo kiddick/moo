@@ -31,9 +31,13 @@ def bookmark(category, record):
         book.write('<hr>\n{}\n'.format(record.markdown()))
 
 
-def push():
+def push(m='Add new record.'):
     repo = git.Repo(LREPO)
     repo.git.add('--all')
-    repo.git.commit(m='Add new record.')
+    repo.git.commit(m)
     repo.git.push(
         'https://kiddick:{token}@{repo}'.format(token=GTOKEN, repo=GREPO.split('//')[1]))
+
+def add_question(content):
+    with open(os.path.join(LREPO, 'stackoverflow', 'questions.md'), 'a') as pyq:
+            pyq.write(content)    
