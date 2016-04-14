@@ -134,20 +134,29 @@ def pyq(bot, update):
                     disable_web_page_preview=True)
 
 
-def pckt(bot):
-    chat_id = 'chat_id'
-    item = packtpub.check()
-    if isinstance(item, str):
-        bot.sendMessage(chat_id, text=item)
-    else:
-        label, image = item
-        bot.sendPhoto(chat_id, photo=image, caption=label)
+def packtpub_on(bot, update):
+    chat_id = update.message.chat_id
 
+    def notify(bot):
+        item = packtpub.check()
+        if isinstance(item, str):
+            bot.sendMessage(chat_id, text=item)
+        else:
+            label, image = item
+            bot.sendPhoto(chat_id, photo=image, caption=label)
+    if job_queue.queue.empty():
+        job_queue.put(notify, 4*60)
+    else:
+        job_queue.start()
+
+
+def packtpub_off(bot, update):
+    job_queue.stop()
+    bot.sendMessage(update.message.chat_id, text='Turned off!')
 
 
 updater = Updater(config.Config.BTOKEN)
 job_queue = updater.job_queue
-job_queue.put(pckt, 10)
 
 # The command
 updater.dispatcher.addTelegramCommandHandler('add', bookmark)
@@ -156,7 +165,8 @@ updater.dispatcher.addTelegramCommandHandler('cancel', cancel)
 updater.dispatcher.addTelegramCommandHandler('info', info)
 updater.dispatcher.addTelegramCommandHandler('src', src)
 updater.dispatcher.addTelegramCommandHandler('pyq', pyq)
-# updater.dispatcher.addTelegramCommandHandler('pckt', pckt)
+updater.dispatcher.addTelegramCommandHandler('packtpub_on', packtpub_on)
+updater.dispatcher.addTelegramCommandHandler('packtpub_off', packtpub_off)
 
 
 updater.start_polling()
