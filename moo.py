@@ -4,6 +4,7 @@ import logging
 
 import draft
 import qstack
+import packtpub
 
 from telegram import Emoji, ForceReply, ReplyKeyboardMarkup, ParseMode
 from telegram.ext import Updater
@@ -133,7 +134,20 @@ def pyq(bot, update):
                     disable_web_page_preview=True)
 
 
+def pckt(bot):
+    chat_id = 'chat_id'
+    item = packtpub.check()
+    if isinstance(item, str):
+        bot.sendMessage(chat_id, text=item)
+    else:
+        label, image = item
+        bot.sendPhoto(chat_id, photo=image, caption=label)
+
+
+
 updater = Updater(config.Config.BTOKEN)
+job_queue = updater.job_queue
+job_queue.put(pckt, 10)
 
 # The command
 updater.dispatcher.addTelegramCommandHandler('add', bookmark)
@@ -142,6 +156,7 @@ updater.dispatcher.addTelegramCommandHandler('cancel', cancel)
 updater.dispatcher.addTelegramCommandHandler('info', info)
 updater.dispatcher.addTelegramCommandHandler('src', src)
 updater.dispatcher.addTelegramCommandHandler('pyq', pyq)
+# updater.dispatcher.addTelegramCommandHandler('pckt', pckt)
 
 
 updater.start_polling()
