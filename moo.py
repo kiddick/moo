@@ -145,7 +145,7 @@ def packtpub_on(bot, update):
             label, image = item
             bot.sendPhoto(chat_id, photo=image, caption=label)
     if job_queue.queue.empty():
-        job_queue.put(notify, 4*60)
+        job_queue.put(notify, 4 * 60 * 60)
     else:
         job_queue.start()
 
@@ -155,7 +155,7 @@ def packtpub_off(bot, update):
     bot.sendMessage(update.message.chat_id, text='Turned off!')
 
 
-updater = Updater(config.Config.BTOKEN)
+updater = Updater(config.Config.BTOKEN, job_queue_tick_interval=60 * 60)
 job_queue = updater.job_queue
 
 # The command
