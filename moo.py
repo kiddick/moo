@@ -5,8 +5,9 @@ import logging
 import draft
 import qstack
 import packtpub
+import utils
 
-from telegram import Emoji, ForceReply, ReplyKeyboardMarkup, ParseMode
+from telegram import ParseMode
 from telegram.ext import Updater
 
 import config
@@ -145,7 +146,8 @@ def packtpub_on(bot, update):
             label, image = item
             bot.sendPhoto(chat_id, photo=image, caption=label)
     if job_queue.queue.empty():
-        job_queue.put(notify, 4 * 60 * 60)
+        notify(bot)
+        job_queue.put(notify, interval=2 * 60 * 60, next_t=utils.total(3))
     else:
         job_queue.start()
 
@@ -165,8 +167,8 @@ updater.dispatcher.addTelegramCommandHandler('cancel', cancel)
 updater.dispatcher.addTelegramCommandHandler('info', info)
 updater.dispatcher.addTelegramCommandHandler('src', src)
 updater.dispatcher.addTelegramCommandHandler('pyq', pyq)
-updater.dispatcher.addTelegramCommandHandler('packtpub_on', packtpub_on)
-updater.dispatcher.addTelegramCommandHandler('packtpub_off', packtpub_off)
+updater.dispatcher.addTelegramCommandHandler('ppub_on', packtpub_on)
+updater.dispatcher.addTelegramCommandHandler('ppub_off', packtpub_off)
 
 
 updater.start_polling()
