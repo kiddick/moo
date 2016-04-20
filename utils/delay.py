@@ -1,8 +1,12 @@
 '''This module contains time calculation stuff for deferred tasks.'''
 
+import logging
+
 from pytz import timezone
 from datetime import datetime
 
+
+logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 TZ = timezone('Europe/Moscow')
 
@@ -32,4 +36,7 @@ def start_time(hour):
 
 def total(offset, hour=datetime.now(TZ).hour):
     '''Return delay until start in seconds.'''
-    return (start_time(ready(hour, offset)) - datetime.now(TZ)).total_seconds()
+    delay = (start_time(ready(hour, offset)) -
+             datetime.now(TZ)).total_seconds()
+    logging.debug('Time until first run: %s', delay)
+    return delay

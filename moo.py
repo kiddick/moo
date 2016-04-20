@@ -134,7 +134,7 @@ def pyq(bot, update):
     qstack.incrementq()
     content = '* _[{}]({})_\n'.format(title, link)
     draft.add_question(content)
-    # draft.push(m='Add new question.')
+    draft.push(m='Add new question.')
     bot.sendMessage(update.message.chat_id,
                     text='[{}]({})\n'.format(title, link),
                     parse_mode=ParseMode.MARKDOWN,
@@ -153,7 +153,7 @@ def packtpub_on(bot, update):
             bot.sendPhoto(chat_id, photo=image, caption=label)
     if job_queue.queue.empty():
         notify(bot)
-        job_queue.put(notify, interval=2 * 60 * 60, next_t=utils.total(3))
+        job_queue.put(notify, interval=3 * 60 * 60, next_t=utils.total(3))
     else:
         job_queue.start()
 
