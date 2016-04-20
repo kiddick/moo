@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+'''A main module with Moo bot powered by Telegram Bot API.'''
+
 import logging
 
 import draft
@@ -12,9 +14,13 @@ from telegram.ext import Updater
 
 import config
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - '
-                           '%(message)s',
+
+logging.basicConfig(filename='moo.log',
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
+
+logging.debug('>>> Bot is started!\n')
+
 
 MENU, AWAIT_INPUT, AWAIT_LINK, AWAIT_CONFIRMATION = range(4)
 

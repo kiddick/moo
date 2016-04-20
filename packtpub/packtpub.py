@@ -10,9 +10,7 @@ import werkzeug
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - '
-                           '%(message)s',
-                    level=logging.DEBUG)
+logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 OFFER_URL = 'https://www.packtpub.com/packt/offers/free-learning'
 
