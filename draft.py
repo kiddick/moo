@@ -31,9 +31,11 @@ def bookmark(category, record):
 
 
 def push(m='Add new record.'):
+    if Config.DEBUG:
+        return
     repo = git.Repo(LREPO)
     repo.git.add('--all')
-    repo.git.commit(m)
+    repo.git.commit(m=m)
     repo.git.push(
         'https://kiddick:{token}@{repo}'.format(token=GTOKEN, repo=GREPO.split('//')[1]))
 
