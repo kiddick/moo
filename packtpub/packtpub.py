@@ -49,6 +49,6 @@ def check():
         return 'Something wrong! Check logs.'
     if not book or book != label:
         with open(feed, 'a') as _:
-            _.write('{}\n'.format(label))
+            _.write('{}\n'.format(label.encode('utf-8')))
         return label, img
     return 'No updates!'

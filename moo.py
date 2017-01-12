@@ -10,14 +10,23 @@ import packtpub
 import utils
 
 from telegram import ParseMode
-from telegram.ext import Updater
+from telegram.ext import Job, Updater
+from telegram.ext import CommandHandler, MessageHandler, Filters
 
 import config
 
 
-logging.basicConfig(filename='moo.log',
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.DEBUG)
+if config.Config.DEBUG:
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.DEBUG
+    )
+else:
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.DEBUG,
+        filename='moo.log'
+    )
 
 logging.debug('>>> Bot is started!\n')
 
@@ -42,7 +51,7 @@ CATEGORY = {
 class Record(object):
 
     def __init__(self, category):
-        self.category = CATEGORY[category]
+        self.category = category
         self.link = None
         self.description = None
 
@@ -60,7 +69,7 @@ class Record(object):
                 '{1}'.format(self.link, self.description))
 
 
-def bookmark(bot, update, args):
+def bookmark(bot, update, args=None):
     chat_id = update.message.chat_id
     user_id = update.message.from_user.id
     text = update.message.text
@@ -73,9 +82,16 @@ def bookmark(bot, update, args):
         except IndexError:
             bot.sendMessage(chat_id, text='Provide category please.')
             return
-
+        record_category = CATEGORY.get(category)
+        if not record_category:
+            bot.sendMessage(
+                chat_id,
+                text='There is no such category: *{}!*'.format(category),
+                parse_mode=ParseMode.MARKDOWN
+            )
+            return
         state[chat_id] = AWAIT_LINK
-        context[chat_id] = (user_id, Record(category))
+        context[chat_id] = (user_id, Record(record_category))
         bot.sendMessage(chat_id,
                         text='Current category *{}*. Put link'.format(
                             category),
@@ -141,8 +157,12 @@ def pyq(bot, update):
                     disable_web_page_preview=True)
 
 
-def packtpub_on(bot, update):
+def packtpub_on(bot, update, job_queue, chat_data):
     chat_id = update.message.chat_id
+    job = chat_data.get('job')
+    if job:
+        bot.sendMessage(update.message.chat_id, text='Subscription is already started!')
+        return
 
     def notify(bot):
         item = packtpub.check()
@@ -151,30 +171,37 @@ def packtpub_on(bot, update):
         else:
             label, image = item
             bot.sendPhoto(chat_id, photo=image, caption=label)
-    if job_queue.queue.empty():
-        notify(bot)
-        job_queue.put(notify, interval=3 * 60 * 60, next_t=utils.total(3))
-    else:
-        job_queue.start()
+
+    notify(bot)
+    job = Job(notify, interval=6 * 60 * 60, repeat=True, context=chat_id)
+    chat_data['job'] = job
+    job_queue.put(job, next_t=utils.total(6))
 
 
-def packtpub_off(bot, update):
-    job_queue.stop()
+def packtpub_off(bot, update, chat_data):
+    job = chat_data.get('job')
+    if not job:
+        bot.sendMessage(update.message.chat_id, text='Nothing to stop :)')
+        return
+    job.schedule_removal()
+    del chat_data['job']
     bot.sendMessage(update.message.chat_id, text='Turned off!')
 
 
-updater = Updater(config.Config.BTOKEN, job_queue_tick_interval=60 * 60)
-job_queue = updater.job_queue
+updater = Updater(config.Config.BTOKEN)
 
-# The command
-updater.dispatcher.addTelegramCommandHandler('add', bookmark)
-updater.dispatcher.addTelegramMessageHandler(bookmark)
-updater.dispatcher.addTelegramCommandHandler('cancel', cancel)
-updater.dispatcher.addTelegramCommandHandler('info', info)
-updater.dispatcher.addTelegramCommandHandler('src', src)
-updater.dispatcher.addTelegramCommandHandler('pyq', pyq)
-updater.dispatcher.addTelegramCommandHandler('ppub_on', packtpub_on)
-updater.dispatcher.addTelegramCommandHandler('ppub_off', packtpub_off)
+
+# Commands
+updater.dispatcher.add_handler(CommandHandler('add', bookmark, pass_args=True))
+updater.dispatcher.add_handler(MessageHandler(Filters.text, bookmark))
+updater.dispatcher.add_handler(CommandHandler('cancel', cancel))
+updater.dispatcher.add_handler(CommandHandler('info', info))
+updater.dispatcher.add_handler(CommandHandler('src', src, pass_args=True))
+updater.dispatcher.add_handler(CommandHandler('pyq', pyq))
+updater.dispatcher.add_handler(
+    CommandHandler('ppub_on', packtpub_on, pass_job_queue=True, pass_chat_data=True))
+updater.dispatcher.add_handler(
+    CommandHandler('ppub_off', packtpub_off, pass_chat_data=True))
 
 
 updater.start_polling()
