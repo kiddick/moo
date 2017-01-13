@@ -164,7 +164,7 @@ def packtpub_on(bot, update, job_queue, chat_data):
         bot.sendMessage(update.message.chat_id, text='Subscription is already started!')
         return
 
-    def notify(bot):
+    def notify(bot, job=None):
         item = packtpub.check()
         if isinstance(item, str):
             bot.sendMessage(chat_id, text=item)
