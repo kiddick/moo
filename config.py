@@ -11,7 +11,13 @@ with open(os.path.join(__location__, 'settings.yaml')) as ysttgs:
 
 class Config(object):
     DEBUG = settings['debug']
+    LOGGING_LEVEL = settings['logging_level']
+
     LREPO = settings['draft_repo']
     GREPO = settings['github_repo']
     GTOKEN = settings['github_token']
     BTOKEN = settings['bot_token']
+
+    PPUB_EMAIL = settings['ppub_email']
+    PPUB_PASSWORD = settings['ppub_password']
+    PPUB_BOOKS = settings['ppub_books_path']

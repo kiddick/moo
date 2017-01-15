@@ -13,18 +13,17 @@ from telegram import ParseMode
 from telegram.ext import Job, Updater
 from telegram.ext import CommandHandler, MessageHandler, Filters
 
-import config
+from config import Config
 
-
-if config.Config.DEBUG:
+if Config.DEBUG:
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=logging.DEBUG
+        level=logging.getLevelName(Config.LOGGING_LEVEL)
     )
 else:
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=logging.DEBUG,
+        level=logging.getLevelName(Config.LOGGING_LEVEL),
         filename='moo.log'
     )
 
@@ -138,10 +137,10 @@ def info(bot, update):
 
 def src(bot, update, args):
     if not args or args[0] not in CATEGORY:
-        bot.sendMessage(update.message.chat_id, text=config.Config.GREPO)
+        bot.sendMessage(update.message.chat_id, text=Config.GREPO)
     else:
         link = '{repo}/blob/master/{cat}/{cat}.md'.format(
-            repo=config.Config.GREPO, cat=CATEGORY[args[0]])
+            repo=Config.GREPO, cat=CATEGORY[args[0]])
         bot.sendMessage(update.message.chat_id, text=link)
 
 
@@ -165,12 +164,14 @@ def packtpub_on(bot, update, job_queue, chat_data):
         return
 
     def notify(bot, job=None):
-        item = packtpub.check()
-        if isinstance(item, str):
-            bot.sendMessage(chat_id, text=item)
+        item, notification = packtpub.check()
+        if not item:
+            bot.sendMessage(chat_id, text=notification)
         else:
-            label, image = item
-            bot.sendPhoto(chat_id, photo=image, caption=label)
+            bot.sendPhoto(chat_id, photo=item.img, caption=item.label)
+            book_path = packtpub.download_book(item.claim_url)
+            with open(book_path) as book_file:
+                bot.send_document(chat_id, book_file)
 
     notify(bot)
     job = Job(notify, interval=6 * 60 * 60, repeat=True, context=chat_id)
@@ -188,7 +189,7 @@ def packtpub_off(bot, update, chat_data):
     bot.sendMessage(update.message.chat_id, text='Turned off!')
 
 
-updater = Updater(config.Config.BTOKEN)
+updater = Updater(Config.BTOKEN)
 
 
 # Commands
