@@ -79,11 +79,11 @@ def bookmark(bot, update, args=None):
         try:
             category = args[0]
         except IndexError:
-            bot.sendMessage(chat_id, text='Provide category please.')
+            bot.send_message(chat_id, text='Provide category please.')
             return
         record_category = CATEGORY.get(category)
         if not record_category:
-            bot.sendMessage(
+            bot.send_message(
                 chat_id,
                 text='There is no such category: *{}!*'.format(category),
                 parse_mode=ParseMode.MARKDOWN
@@ -91,23 +91,23 @@ def bookmark(bot, update, args=None):
             return
         state[chat_id] = AWAIT_LINK
         context[chat_id] = (user_id, Record(record_category))
-        bot.sendMessage(chat_id,
-                        text='Current category *{}*. Put link'.format(
-                            category),
-                        parse_mode=ParseMode.MARKDOWN)
+        bot.send_message(chat_id,
+                         text='Current category *{}*. Put link'.format(
+                             category),
+                         parse_mode=ParseMode.MARKDOWN)
 
     elif chat_state == AWAIT_LINK and chat_context[0] == user_id:
         state[chat_id] = AWAIT_INPUT
 
         context[chat_id][1].link = text
-        bot.sendMessage(chat_id,
-                        text='Add some description.')
+        bot.send_message(chat_id,
+                         text='Add some description.')
 
     elif chat_state == AWAIT_INPUT and chat_context[0] == user_id:
         state[chat_id] = AWAIT_CONFIRMATION
         context[chat_id][1].description = text
 
-        bot.sendMessage(
+        bot.send_message(
             chat_id, text="Check bookmark\n" + str(context[chat_id][1]))
 
     elif chat_state == AWAIT_CONFIRMATION and chat_context[0] == user_id:
@@ -118,11 +118,11 @@ def bookmark(bot, update, args=None):
             draft.bookmark(record.category, record)
             draft.push()
 
-            bot.sendMessage(chat_id,
-                            text='Your information was successfully added.')
+            bot.send_message(chat_id,
+                             text='Your information was successfully added.')
         else:
-            bot.sendMessage(chat_id,
-                            text='No any changes.')
+            bot.send_message(chat_id,
+                             text='No any changes.')
 
 
 def cancel(bot, update):
@@ -132,16 +132,16 @@ def cancel(bot, update):
 
 
 def info(bot, update):
-    bot.sendMessage(update.message.chat_id, text='Use /add to test this bot.')
+    bot.send_message(update.message.chat_id, text='Use /add to test this bot.')
 
 
 def src(bot, update, args):
     if not args or args[0] not in CATEGORY:
-        bot.sendMessage(update.message.chat_id, text=Config.GREPO)
+        bot.send_message(update.message.chat_id, text=Config.GREPO)
     else:
         link = '{repo}/blob/master/{cat}/{cat}.md'.format(
             repo=Config.GREPO, cat=CATEGORY[args[0]])
-        bot.sendMessage(update.message.chat_id, text=link)
+        bot.send_message(update.message.chat_id, text=link)
 
 
 def pyq(bot, update):
@@ -150,25 +150,26 @@ def pyq(bot, update):
     content = '* _[{}]({})_\n'.format(title, link)
     draft.add_question(content)
     draft.push(m='Add new question.')
-    bot.sendMessage(update.message.chat_id,
-                    text='[{}]({})\n'.format(title, link),
-                    parse_mode=ParseMode.MARKDOWN,
-                    disable_web_page_preview=True)
+    bot.send_message(update.message.chat_id,
+                     text='[{}]({})\n'.format(title, link),
+                     parse_mode=ParseMode.MARKDOWN,
+                     disable_web_page_preview=True)
 
 
 def packtpub_on(bot, update, job_queue, chat_data):
     chat_id = update.message.chat_id
     job = chat_data.get('job')
     if job:
-        bot.sendMessage(update.message.chat_id, text='Subscription is already started!')
+        bot.send_message(
+            update.message.chat_id, text='Subscription is already started!')
         return
 
     def notify(bot, job=None):
         item, notification = packtpub.check()
         if not item:
-            bot.sendMessage(chat_id, text=notification)
+            bot.send_message(chat_id, text=notification)
         else:
-            bot.sendPhoto(chat_id, photo=item.img, caption=item.label)
+            bot.send_photo(chat_id, photo=item.img, caption=item.label)
             book_path = packtpub.download_book(item.claim_url)
             with open(book_path) as book_file:
                 bot.send_document(chat_id, book_file)
@@ -182,11 +183,11 @@ def packtpub_on(bot, update, job_queue, chat_data):
 def packtpub_off(bot, update, chat_data):
     job = chat_data.get('job')
     if not job:
-        bot.sendMessage(update.message.chat_id, text='Nothing to stop :)')
+        bot.send_message(update.message.chat_id, text='Nothing to stop :)')
         return
     job.schedule_removal()
     del chat_data['job']
-    bot.sendMessage(update.message.chat_id, text='Turned off!')
+    bot.send_message(update.message.chat_id, text='Turned off!')
 
 
 updater = Updater(Config.BTOKEN)
@@ -200,7 +201,9 @@ updater.dispatcher.add_handler(CommandHandler('info', info))
 updater.dispatcher.add_handler(CommandHandler('src', src, pass_args=True))
 updater.dispatcher.add_handler(CommandHandler('pyq', pyq))
 updater.dispatcher.add_handler(
-    CommandHandler('ppub_on', packtpub_on, pass_job_queue=True, pass_chat_data=True))
+    CommandHandler(
+        'ppub_on', packtpub_on, pass_job_queue=True, pass_chat_data=True)
+)
 updater.dispatcher.add_handler(
     CommandHandler('ppub_off', packtpub_off, pass_chat_data=True))
 
