@@ -1,3 +1,11 @@
-bot_token: 
-draft_repo: 
-github_token: 
+bot_token:
+draft_repo:
+github_repo:
+github_token:
+
+ppub_email:
+ppub_password:
+ppub_books_path:
+
+logging_level:
+debug:
