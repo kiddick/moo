@@ -175,9 +175,14 @@ def packtpub_on(bot, update, job_queue, chat_data):
                 bot.send_document(chat_id, book_file)
 
     notify(bot)
-    job = Job(notify, interval=6 * 60 * 60, repeat=True, context=chat_id)
+    job = Job(
+        notify,
+        interval=Config.JOB_INTERVAL * 60 * 60,
+        repeat=True,
+        context=chat_id
+    )
     chat_data['job'] = job
-    job_queue.put(job, next_t=utils.total(6))
+    job_queue.put(job, next_t=utils.total(Config.JOB_INTERVAL))
 
 
 def packtpub_off(bot, update, chat_data):

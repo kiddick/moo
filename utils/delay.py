@@ -5,10 +5,11 @@ import logging
 from pytz import timezone
 from datetime import datetime
 
+from config import Config
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
-TZ = timezone('Europe/Moscow')
+TZ = timezone(Config.TIMEZONE)
 
 
 def ready(hour, offset):

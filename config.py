@@ -21,3 +21,6 @@ class Config(object):
     PPUB_EMAIL = settings['ppub_email']
     PPUB_PASSWORD = settings['ppub_password']
     PPUB_BOOKS = settings['ppub_books_path']
+
+    TIMEZONE = settings['timezone']
+    JOB_INTERVAL = settings['job_interval']
