@@ -62,7 +62,7 @@ def visit():
                 '/a/img/@data-original'
             )
         )[0]
-        claim_url = doc.xpath('.//a[@class="twelve-days-claim"]/@href')[0]
+        claim_url = doc.xpath('.//div[@class="float-left free-ebook"]/form/@action')[0]
     except Exception as e:
         logging.exception(e)
         return
@@ -116,7 +116,3 @@ def download_book(claim_url):
 
     # downloading from storage
     return fetch_book(book_url, get_book_filename(book_url))
-
-
-# _, _, claim_url = visit()
-# download_book(claim_url)

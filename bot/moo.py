@@ -7,7 +7,7 @@ import logging
 import draft
 import qstack
 import packtpub
-import utils
+import delay
 
 from telegram import ParseMode
 from telegram.ext import Job, Updater
@@ -170,9 +170,10 @@ def packtpub_on(bot, update, job_queue, chat_data):
             bot.send_message(chat_id, text=notification)
         else:
             bot.send_photo(chat_id, photo=item.img, caption=item.label)
-            book_path = packtpub.download_book(item.claim_url)
-            with open(book_path) as book_file:
-                bot.send_document(chat_id, book_file)
+            # disabled due to captcha
+            # book_path = packtpub.download_book(item.claim_url)
+            # with open(book_path) as book_file:
+            #    bot.send_document(chat_id, book_file)
 
     notify(bot)
     job = Job(
@@ -182,7 +183,7 @@ def packtpub_on(bot, update, job_queue, chat_data):
         context=chat_id
     )
     chat_data['job'] = job
-    job_queue.put(job, next_t=utils.total(Config.JOB_INTERVAL))
+    job_queue.put(job, next_t=delay.total(Config.JOB_INTERVAL))
 
 
 def packtpub_off(bot, update, chat_data):
