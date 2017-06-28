@@ -118,5 +118,5 @@ def download_book(claim_url):
     return fetch_book(book_url, get_book_filename(book_url))
 
 
-_, _, claim_url = visit()
-download_book(claim_url)
+# _, _, claim_url = visit()
+# download_book(claim_url)

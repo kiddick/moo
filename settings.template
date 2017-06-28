@@ -7,5 +7,8 @@ ppub_email:
 ppub_password:
 ppub_books_path:
 
+timezone:
+job:
+
 logging_level:
 debug:
